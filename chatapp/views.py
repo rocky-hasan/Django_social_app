@@ -2,12 +2,13 @@ from django.shortcuts import render,redirect,get_object_or_404
 from django.views import generic
 from django.contrib.auth.models import User, auth
 from django.contrib import messages
-from .models import Profile,Post,LikePost,FollowerCount
+from .models import Profile,Post,LikePost,FollowerCount,Comment
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from itertools import chain
 import random
 from django.views import View
+from .forms import CommentForm
 
 # Create your views here.
 @method_decorator(login_required(login_url='signin'), name='dispatch')
@@ -203,7 +204,6 @@ class SettingsView(View):
 
         return redirect('settings')
 
-
 class SignupView(View):
     template_name='signup.html'
     def get(self,request,*args, **kwargs):
@@ -239,7 +239,6 @@ class SignupView(View):
                 messages.error(request,'password not matching !')
                 return redirect('signup')
     
-
 class SigninView(View):
     template_name = 'signin.html'
     def get(self, request, *args, **kwargs):
@@ -256,11 +255,26 @@ class SigninView(View):
             messages.error(request, "Invalid credentials")
             return redirect("signin") 
     
-
-@login_required(login_url='signin')
-class LogoutView(View):
+@method_decorator(login_required(login_url='signin'), name='dispatch')
+class CustomLogoutView(View):
     def get(self, request, *args, **kwargs):
         auth.logout(request)
         return redirect('signin')   
 
+class CommentView(View):
+    template_name = 'index.html'
+    def get(self, request, post_id):
+        post = get_object_or_404(Post, pk=post_id).prefetch_related('comments')
+        comments = post.comments.all()
+        form = CommentForm()
+        return render(request, self.template_name, {'post': post, 'comments': comments, 'form': form})
 
+    def post(self, request, post_id):
+        post = get_object_or_404(Post, pk=post_id)
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.user = request.user
+            comment.post = post
+            comment.save()
+            return render(request, self.template_name, {'post': post, 'comments': post.comments.all(), 'form': form})

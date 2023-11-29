@@ -309,6 +309,9 @@
                                 </div> {% endcomment %}
                                 <p>
                                     <a href="{% url 'profile' pk=post.user %}"><strong>{{post.user}}</strong></a>{{post.caption}}
+                                    {% for comment in comments %}
+                                            <p>{{ comment.user.username }}: {{ comment.text }}</p>
+                                    {% endfor %}
                                 </p>
 
                                 {% comment %} <div class="border-t pt-4 space-y-4 ">
@@ -333,17 +336,16 @@
                                         </div>
                                     </div>
                                 </div> {% endcomment %}
-
-                                {% comment %} <div class="bg-gray-100 bg-gray-100 rounded-full rounded-md relative ">
-                                    <input type="text" placeholder="post a comment" class="bg-transparent max-h-10 shadow-none">
-                                    <div class="absolute bottom-0 flex h-full items-center right-0 right-3 text-xl space-x-2">
-                                        <a href="#"> <i class="uil-image"></i></a>
-                                        <a href="#"> <i class="uil-video"></i></a>
+                            <form action="" method="POST">
+                                {% csrf_token %}
+                                <div class="bg-gray-100 bg-gray-100 rounded-full rounded-md relative ">
+                                    <input type="text" name="text" placeholder="Write your comment">
+                                            <div class="absolute bottom-0 flex h-full items-center right-0 right-3 text-xl space-x-2">
+                                        <button type="submit" class="btn btn-success" >Send</button>
                                     </div>
-                                </div> {% endcomment %}
-    
+                                </div>
+                            </form>
                             </div>
-    
                         </div>
                         {% endfor %}
                     </div>
