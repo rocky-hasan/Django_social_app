@@ -307,12 +307,14 @@
                                         Liked <strong> taiye</strong> and <strong> 209 Others </strong>
                                     </div>
                                 </div> {% endcomment %}
-                                <p>
-                                    <a href="{% url 'profile' pk=post.user %}"><strong>{{post.user}}</strong></a>{{post.caption}}
+                                {% comment %} <p>
+                                    <a href="{% url 'comment' post.id %}"><strong>{{post.user}}</strong></a>{{post.caption}}
+                                   {% if comments %}
                                     {% for comment in comments %}
                                             <p>{{ comment.user.username }}: {{ comment.text }}</p>
                                     {% endfor %}
-                                </p>
+                                    {% endif %}
+                                </p> {% endcomment %}
 
                                 {% comment %} <div class="border-t pt-4 space-y-4 ">
                                     <div class="flex">

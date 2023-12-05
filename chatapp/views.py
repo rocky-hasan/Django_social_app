@@ -264,11 +264,14 @@ class CustomLogoutView(View):
 class CommentView(View):
     template_name = 'index.html'
     def get(self, request, post_id):
-        post = get_object_or_404(Post, pk=post_id).prefetch_related('comments')
-        comments = post.comments.all()
+        # Retrieve the Post object for the specified post_id or return a 404 response
+        post = get_object_or_404(Post, pk=post_id)
+        # Retrieve comments associated with the post, ordered by created_at
+        comments = Comment.objects.filter(post=post).order_by("created_at")
+        # Create a new instance of CommentForm for potential use in the template
         form = CommentForm()
+        # Render the template with the post, comments, and form data
         return render(request, self.template_name, {'post': post, 'comments': comments, 'form': form})
-
     def post(self, request, post_id):
         post = get_object_or_404(Post, pk=post_id)
         form = CommentForm(request.POST)
@@ -277,4 +280,6 @@ class CommentView(View):
             comment.user = request.user
             comment.post = post
             comment.save()
-            return render(request, self.template_name, {'post': post, 'comments': post.comments.all(), 'form': form})
+            return redirect('your_post_detail_url_name', post_id=post.id)
+        return render(request, self.template_name, {'post': post, 'comments': post.comments.all(), 'form': form})
+
